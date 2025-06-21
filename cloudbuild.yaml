@@ -21,26 +21,15 @@ steps:
   - name: "gcr.io/google.com/cloudsdktool/cloud-sdk"
     entrypoint: gcloud
     args:
-      - "run"
-      - "deploy"
-      - "word-flow"
-      - "--image"
-      - "europe-central2-docker.pkg.dev/word-flow-text-analyzer/word-flow-repo/word-flow:latest"
-      - "--region"
-      - "europe-central2"
-      - "--platform"
-      - "managed"
-      - "--allow-unauthenticated"
-      - "--memory"
-      - "1Gi"
-      - "--cpu"
-      - "1"
-      - "--max-instances"
-      - "10"
-      - "--timeout"
-      - "300"
-      - "--set-env-vars"
-      - "DEBUG=False,ALLOWED_HOSTS=*"
+      [
+        "run",
+        "deploy",
+        "word-flow-service",
+        "--image=europe-central2-docker.pkg.dev/word-flow-text-analyzer/word-flow-repo/word-flow:latest",
+        "--region=europe-central2",
+        "--platform=managed",
+        "--allow-unauthenticated",
+      ]
 
 images:
   - "europe-central2-docker.pkg.dev/word-flow-text-analyzer/word-flow-repo/word-flow:latest"
