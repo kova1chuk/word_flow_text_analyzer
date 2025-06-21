@@ -11,6 +11,8 @@ import os
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
 
+from .serializers import EPubUploadSerializer
+
 # Download required NLTK data
 try:
     nltk.data.find('tokenizers/punkt')
@@ -88,15 +90,7 @@ class UploadEpubView(APIView):
         - Remove extra whitespace
         """,
         operation_summary="Upload and parse EPUB file",
-        manual_parameters=[
-            openapi.Parameter(
-                name='file',
-                in_=openapi.IN_FORM,
-                description="EPUB file to upload and parse",
-                type=openapi.TYPE_FILE,
-                required=True,
-            ),
-        ],
+        request_body=EPubUploadSerializer,
         responses={
             200: openapi.Response(
                 description="EPUB file successfully parsed",
