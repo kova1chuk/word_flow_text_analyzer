@@ -27,8 +27,19 @@ SECRET_KEY = os.environ.get(
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.environ.get('DEBUG', 'True').lower() == 'true'
 
-ALLOWED_HOSTS = os.environ.get(
-    'ALLOWED_HOSTS', '127.0.0.1,localhost').split(',')
+# Get the Cloud Run service URL from environment or use default
+CLOUD_RUN_SERVICE_URL = os.environ.get('CLOUD_RUN_SERVICE_URL', '')
+
+# Build ALLOWED_HOSTS list
+ALLOWED_HOSTS = ['127.0.0.1', 'localhost']
+if CLOUD_RUN_SERVICE_URL:
+    # Extract hostname from Cloud Run URL
+    hostname = CLOUD_RUN_SERVICE_URL.replace(
+        'https://', '').replace('http://', '')
+    ALLOWED_HOSTS.append(hostname)
+elif not DEBUG:
+    # In production, allow all hosts if no specific URL is provided
+    ALLOWED_HOSTS = ['*']
 
 
 # Application definition

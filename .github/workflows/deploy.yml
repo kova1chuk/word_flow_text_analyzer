@@ -48,7 +48,7 @@ jobs:
 
       - name: Deploy to Cloud Run
         run: |
-          gcloud run deploy $SERVICE_NAME \
+          gcloud run deploy word-flow-service \
             --image $REPOSITORY/$SERVICE_NAME:latest \
             --region $REGION \
             --platform managed \
@@ -61,4 +61,4 @@ jobs:
 
       - name: Show Service URL
         run: |
-          gcloud run services describe $SERVICE_NAME --region=$REGION --format='value(status.url)'
+          gcloud run services describe word-flow-service --region=$REGION --format='value(status.url)'

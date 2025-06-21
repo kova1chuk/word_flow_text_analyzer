@@ -7,9 +7,9 @@ set -e
 
 PROJECT_ID=${1:-word-flow-text-analyzer}
 REGION=${2:-europe-central2}
-SERVICE_NAME="word-flow"
+SERVICE_NAME="word-flow-service"
 REPOSITORY="europe-central2-docker.pkg.dev/word-flow-text-analyzer/word-flow-repo"
-IMAGE_NAME="$REPOSITORY/$SERVICE_NAME:latest"
+IMAGE_NAME="$REPOSITORY/word-flow:latest"
 
 echo "Deploying to Cloud Run..."
 echo "Project ID: $PROJECT_ID"

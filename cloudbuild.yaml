@@ -29,6 +29,7 @@ steps:
         "--region=europe-central2",
         "--platform=managed",
         "--allow-unauthenticated",
+        "--set-env-vars=DEBUG=False,ALLOWED_HOSTS=*",
       ]
 
 images:
