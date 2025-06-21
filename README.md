@@ -13,6 +13,7 @@ A Django REST API for parsing EPUB files and extracting text analysis data, cont
 - **Containerized deployment on Google Cloud Run**
 - **CI/CD pipeline with GitHub Actions**
 - **Artifact Registry for container images**
+- **Swagger/OpenAPI documentation**
 
 ## Local Development
 
@@ -32,7 +33,24 @@ A Django REST API for parsing EPUB files and extracting text analysis data, cont
 
 3. **Access the API:**
    - Base URL: `http://127.0.0.1:8000/`
+   - API Documentation: `http://127.0.0.1:8000/swagger/`
+   - ReDoc Documentation: `http://127.0.0.1:8000/redoc/`
    - Upload endpoint: `http://127.0.0.1:8000/api/upload/`
+   - Health check: `http://127.0.0.1:8000/api/health/`
+
+## API Documentation
+
+### Swagger UI
+- **Local**: `http://127.0.0.1:8000/swagger/`
+- **Production**: `https://your-service-url/swagger/`
+
+### ReDoc
+- **Local**: `http://127.0.0.1:8000/redoc/`
+- **Production**: `https://your-service-url/redoc/`
+
+### OpenAPI Schema
+- **JSON**: `http://127.0.0.1:8000/swagger.json`
+- **YAML**: `http://127.0.0.1:8000/swagger.yaml`
 
 ## Cloud Run Deployment
 
@@ -108,6 +126,18 @@ A Django REST API for parsing EPUB files and extracting text analysis data, cont
 
 ## API Endpoints
 
+### GET /api/health/
+Health check endpoint to verify API status.
+
+**Response:**
+```json
+{
+    "status": "healthy",
+    "message": "Word Flow Text Analyzer API is running",
+    "version": "v1.0.0"
+}
+```
+
 ### POST /api/upload/
 
 Upload an EPUB file for parsing and analysis.
@@ -140,19 +170,25 @@ Upload an EPUB file for parsing and analysis.
 
 ### Local Testing
 
-1. **Test with no file:**
+1. **Test health check:**
+
+   ```bash
+   curl -X GET http://127.0.0.1:8000/api/health/
+   ```
+
+2. **Test with no file:**
 
    ```bash
    curl -X POST http://127.0.0.1:8000/api/upload/
    ```
 
-2. **Test with wrong file type:**
+3. **Test with wrong file type:**
 
    ```bash
    curl -X POST -F "file=@requirements.txt" http://127.0.0.1:8000/api/upload/
    ```
 
-3. **Test with valid EPUB file:**
+4. **Test with valid EPUB file:**
 
    ```bash
    curl -X POST -F "file=@your_book.epub" http://127.0.0.1:8000/api/upload/
@@ -163,6 +199,10 @@ Upload an EPUB file for parsing and analysis.
 Replace `YOUR_SERVICE_URL` with your actual Cloud Run service URL:
 
 ```bash
+# Health check
+curl -X GET https://YOUR_SERVICE_URL/api/health/
+
+# Upload EPUB
 curl -X POST -F "file=@your_book.epub" https://YOUR_SERVICE_URL/api/upload/
 ```
 
@@ -172,6 +212,7 @@ curl -X POST -F "file=@your_book.epub" https://YOUR_SERVICE_URL/api/upload/
 
 - **Django**: Web framework
 - **Django REST Framework**: API framework
+- **drf-yasg**: Swagger/OpenAPI documentation
 - **ebooklib**: EPUB file parsing
 - **BeautifulSoup**: HTML parsing
 - **NLTK**: Natural language processing
@@ -222,7 +263,7 @@ word_flow_text_analyzer/
 │   ├── settings.py         # Django configuration
 │   └── urls.py            # Main URL routing
 ├── epub_parser/           # Main app
-│   ├── views.py          # API views
+│   ├── views.py          # API views with Swagger docs
 │   ├── urls.py           # App URL routing
 │   └── models.py         # Database models
 ├── .github/workflows/     # GitHub Actions CI/CD
@@ -242,7 +283,7 @@ word_flow_text_analyzer/
 View logs in Google Cloud Console:
 
 ```bash
-gcloud logs read --service=word-flow --limit=50
+gcloud logs read --service=word-flow-service --limit=50
 ```
 
 ### Performance Monitoring
@@ -271,11 +312,12 @@ gcloud logs read --service=word-flow --limit=50
 
 To add new features or modify the existing functionality:
 
-1. Update the `UploadEpubView` in `epub_parser/views.py`
+1. Update the views in `epub_parser/views.py` with proper Swagger documentation
 2. Add new URL patterns in `epub_parser/urls.py` if needed
 3. Test locally with `python manage.py runserver`
-4. Push to main branch for automatic deployment
-5. Update this README with new features
+4. Check Swagger documentation at `/swagger/`
+5. Push to main branch for automatic deployment
+6. Update this README with new features
 
 ## Notes
 
@@ -286,3 +328,4 @@ To add new features or modify the existing functionality:
 - Cloud Run automatically scales to zero when not in use
 - Deployment takes ~2-3 minutes for the first build
 - Using Artifact Registry in europe-central2 for better performance in Europe
+- Swagger documentation is automatically generated from code annotations

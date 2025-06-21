@@ -8,6 +8,8 @@ from bs4 import BeautifulSoup
 import nltk
 from nltk.tokenize import word_tokenize, sent_tokenize
 import os
+from drf_yasg.utils import swagger_auto_schema
+from drf_yasg import openapi
 
 # Download required NLTK data
 try:
@@ -18,9 +20,181 @@ except LookupError:
 # Create your views here.
 
 
+class HealthCheckView(APIView):
+    """
+    Health check endpoint to verify API status
+    """
+
+    @swagger_auto_schema(
+        operation_description="Check the health status of the API",
+        operation_summary="Health check",
+        responses={
+            200: openapi.Response(
+                description="API is healthy",
+                schema=openapi.Schema(
+                    type=openapi.TYPE_OBJECT,
+                    properties={
+                        'status': openapi.Schema(
+                            type=openapi.TYPE_STRING,
+                            description="Health status"
+                        ),
+                        'message': openapi.Schema(
+                            type=openapi.TYPE_STRING,
+                            description="Health message"
+                        ),
+                        'version': openapi.Schema(
+                            type=openapi.TYPE_STRING,
+                            description="API version"
+                        )
+                    }
+                ),
+                examples={
+                    "application/json": {
+                        "status": "healthy",
+                        "message": "Word Flow Text Analyzer API is running",
+                        "version": "v1.0.0"
+                    }
+                }
+            )
+        },
+        tags=['Health'],
+        operation_id='health_check'
+    )
+    def get(self, request):
+        return Response({
+            'status': 'healthy',
+            'message': 'Word Flow Text Analyzer API is running',
+            'version': 'v1.0.0'
+        })
+
+
 class UploadEpubView(APIView):
     parser_classes = [MultiPartParser]
 
+    @swagger_auto_schema(
+        operation_description="""
+        Upload an EPUB file for parsing and text analysis.
+        
+        This endpoint accepts an EPUB file and returns:
+        - Full word list (all words from the book)
+        - Unique word list (deduplicated words)
+        - List of sentences from the book
+        - Statistics (total counts)
+        
+        The text is processed to:
+        - Remove HTML tags and formatting
+        - Convert to lowercase
+        - Filter for alphabetic words only
+        - Remove extra whitespace
+        """,
+        operation_summary="Upload and parse EPUB file",
+        manual_parameters=[
+            openapi.Parameter(
+                'file',
+                openapi.IN_FORM,
+                description="EPUB file to upload and parse",
+                type=openapi.TYPE_FILE,
+                required=True,
+                format='binary'
+            ),
+        ],
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'file': openapi.Schema(
+                    type=openapi.TYPE_FILE,
+                    description="EPUB file (max 50MB)"
+                )
+            },
+            required=['file']
+        ),
+        responses={
+            200: openapi.Response(
+                description="EPUB file successfully parsed",
+                schema=openapi.Schema(
+                    type=openapi.TYPE_OBJECT,
+                    properties={
+                        'word_list': openapi.Schema(
+                            type=openapi.TYPE_ARRAY,
+                            items=openapi.Schema(type=openapi.TYPE_STRING),
+                            description="Complete list of all words from the EPUB (lowercase, alphabetic only)"
+                        ),
+                        'unique_words': openapi.Schema(
+                            type=openapi.TYPE_ARRAY,
+                            items=openapi.Schema(type=openapi.TYPE_STRING),
+                            description="Deduplicated list of unique words (sorted alphabetically)"
+                        ),
+                        'sentences': openapi.Schema(
+                            type=openapi.TYPE_ARRAY,
+                            items=openapi.Schema(type=openapi.TYPE_STRING),
+                            description="List of sentences extracted from the EPUB"
+                        ),
+                        'total_words': openapi.Schema(
+                            type=openapi.TYPE_INTEGER,
+                            description="Total number of words in the book"
+                        ),
+                        'total_unique_words': openapi.Schema(
+                            type=openapi.TYPE_INTEGER,
+                            description="Total number of unique words in the book"
+                        ),
+                        'total_sentences': openapi.Schema(
+                            type=openapi.TYPE_INTEGER,
+                            description="Total number of sentences in the book"
+                        )
+                    }
+                ),
+                examples={
+                    "application/json": {
+                        "word_list": ["this", "is", "a", "test", "book", "with", "many", "words"],
+                        "unique_words": ["a", "book", "is", "many", "test", "this", "with", "words"],
+                        "sentences": ["This is a test book.", "It has many words."],
+                        "total_words": 8,
+                        "total_unique_words": 7,
+                        "total_sentences": 2
+                    }
+                }
+            ),
+            400: openapi.Response(
+                description="Bad request - validation error",
+                schema=openapi.Schema(
+                    type=openapi.TYPE_OBJECT,
+                    properties={
+                        'error': openapi.Schema(
+                            type=openapi.TYPE_STRING,
+                            description="Error message"
+                        )
+                    }
+                ),
+                examples={
+                    "application/json": {
+                        "error": "No file provided"
+                    },
+                    "application/json": {
+                        "error": "File must be an EPUB file"
+                    }
+                }
+            ),
+            500: openapi.Response(
+                description="Internal server error",
+                schema=openapi.Schema(
+                    type=openapi.TYPE_OBJECT,
+                    properties={
+                        'error': openapi.Schema(
+                            type=openapi.TYPE_STRING,
+                            description="Error message"
+                        )
+                    }
+                ),
+                examples={
+                    "application/json": {
+                        "error": "Error processing EPUB file: Invalid EPUB format"
+                    }
+                }
+            )
+        },
+        tags=['EPUB Processing'],
+        operation_id='upload_epub'
+    )
     def post(self, request):
         try:
             # Check if file is provided
