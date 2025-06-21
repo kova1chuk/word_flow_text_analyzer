@@ -90,24 +90,13 @@ class UploadEpubView(APIView):
         operation_summary="Upload and parse EPUB file",
         manual_parameters=[
             openapi.Parameter(
-                'file',
-                openapi.IN_FORM,
+                name='file',
+                in_=openapi.IN_FORM,
                 description="EPUB file to upload and parse",
                 type=openapi.TYPE_FILE,
                 required=True,
-                format='binary'
             ),
         ],
-        request_body=openapi.Schema(
-            type=openapi.TYPE_OBJECT,
-            properties={
-                'file': openapi.Schema(
-                    type=openapi.TYPE_FILE,
-                    description="EPUB file (max 50MB)"
-                )
-            },
-            required=['file']
-        ),
         responses={
             200: openapi.Response(
                 description="EPUB file successfully parsed",
