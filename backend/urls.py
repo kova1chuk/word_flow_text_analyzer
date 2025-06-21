@@ -16,6 +16,10 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include, re_path
+from django.shortcuts import redirect
+from django.http import JsonResponse
+from rest_framework.views import APIView
+from rest_framework.response import Response
 from rest_framework import permissions
 from drf_yasg.views import get_schema_view
 from drf_yasg import openapi
@@ -34,7 +38,37 @@ schema_view = get_schema_view(
     permission_classes=(permissions.AllowAny,),
 )
 
+
+class RootAPIView(APIView):
+    """
+    Root API endpoint that provides basic information about the API
+    """
+
+    def get(self, request):
+        return Response({
+            'name': 'Word Flow Text Analyzer API',
+            'version': 'v1.0.0',
+            'description': 'API for parsing EPUB files and extracting text analysis data',
+            'endpoints': {
+                'health': '/api/health/',
+                'upload': '/api/upload/',
+                'swagger': '/swagger/',
+                'redoc': '/redoc/',
+                'admin': '/admin/'
+            },
+            'documentation': '/swagger/'
+        })
+
+
+def redirect_to_swagger(request):
+    """Redirect root URL to Swagger documentation"""
+    return redirect('/swagger/')
+
+
 urlpatterns = [
+    # Root URL - redirect to Swagger or provide API info
+    path('', RootAPIView.as_view(), name='api_root'),
+
     path('admin/', admin.site.urls),
     path('api/', include('epub_parser.urls')),
 

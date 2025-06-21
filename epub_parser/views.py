@@ -6,18 +6,18 @@ from rest_framework import status
 from ebooklib import epub
 from bs4 import BeautifulSoup
 import nltk
-from nltk.tokenize import word_tokenize, sent_tokenize
+from nltk.tokenize import sent_tokenize
 import os
+import logging
+from io import BytesIO
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
+from django.conf import settings
 
 from .serializers import EPubUploadSerializer
 
-# Download required NLTK data
-try:
-    nltk.data.find('tokenizers/punkt')
-except LookupError:
-    nltk.download('punkt')
+# Set up logging
+logger = logging.getLogger(__name__)
 
 # Create your views here.
 
@@ -180,48 +180,133 @@ class UploadEpubView(APIView):
     )
     def post(self, request):
         try:
+            logger.info("Starting EPUB upload processing")
+
             # Check if file is provided
             if 'file' not in request.FILES:
+                logger.error("No file provided in request")
                 return Response(
                     {'error': 'No file provided'},
                     status=status.HTTP_400_BAD_REQUEST
                 )
 
             epub_file = request.FILES['file']
+            logger.info(
+                f"Received file: {epub_file.name}, size: {epub_file.size} bytes")
 
             # Validate file extension
             if not epub_file.name.lower().endswith('.epub'):
+                logger.error(f"Invalid file extension: {epub_file.name}")
                 return Response(
                     {'error': 'File must be an EPUB file'},
                     status=status.HTTP_400_BAD_REQUEST
                 )
 
+            # Ensure NLTK data is available
+            try:
+                logger.info("Checking NLTK punkt tokenizer")
+                nltk.data.find('tokenizers/punkt')
+                logger.info("NLTK punkt tokenizer is available")
+            except LookupError:
+                logger.info("Downloading NLTK punkt tokenizer")
+                nltk.download('punkt')
+
+            # Download all punkt resources to be safe
+            try:
+                nltk.download('punkt', quiet=True)
+                logger.info("NLTK punkt resources downloaded")
+            except Exception as e:
+                logger.warning(f"Could not download punkt resources: {e}")
+
+            # Manually download punkt_tab if needed
+            try:
+                nltk.download('punkt_tab', quiet=True)
+                logger.info("NLTK punkt_tab downloaded")
+            except Exception as e:
+                logger.warning(f"Could not download punkt_tab: {e}")
+
             # Read and parse the EPUB file
-            book = epub.read_epub(epub_file)
+            try:
+                logger.info("Reading EPUB file")
+                # Save the uploaded file temporarily and read it
+                import tempfile
+                with tempfile.NamedTemporaryFile(delete=False, suffix='.epub') as temp_file:
+                    for chunk in epub_file.chunks():
+                        temp_file.write(chunk)
+                    temp_file_path = temp_file.name
+
+                # Read the EPUB from the temporary file
+                book = epub.read_epub(temp_file_path)
+                logger.info("EPUB file read successfully")
+
+                # Clean up the temporary file
+                os.unlink(temp_file_path)
+            except Exception as epub_error:
+                logger.error(f"Failed to read EPUB file: {str(epub_error)}")
+                return Response(
+                    {'error': f'Failed to read EPUB file: {str(epub_error)}'},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
 
             # Extract text from all document items
             text = ''
-            for item in book.get_items():
-                if item.get_type() == 9:  # ITEM_DOCUMENT
-                    soup = BeautifulSoup(item.get_content(), 'html.parser')
-                    text += soup.get_text() + ' '
+            try:
+                logger.info("Extracting text from EPUB")
+                for item in book.get_items():
+                    if item.get_type() == 9:  # ITEM_DOCUMENT
+                        soup = BeautifulSoup(item.get_content(), 'html.parser')
+                        text += soup.get_text() + ' '
+                logger.info(f"Extracted {len(text)} characters of text")
+            except Exception as text_error:
+                logger.error(
+                    f"Failed to extract text from EPUB: {str(text_error)}")
+                return Response(
+                    {'error': f'Failed to extract text from EPUB: {str(text_error)}'},
+                    status=status.HTTP_500_INTERNAL_SERVER_ERROR
+                )
+
+            # Check if we got any text
+            if not text.strip():
+                logger.error("No text content found in EPUB file")
+                return Response(
+                    {'error': 'No text content found in the EPUB file'},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
 
             # Clean and tokenize text
-            # Remove extra whitespace and normalize
-            text = ' '.join(text.split())
+            try:
+                logger.info("Tokenizing text")
+                # Remove extra whitespace and normalize
+                text = ' '.join(text.split())
 
-            # Tokenize words and sentences
-            words = word_tokenize(text)
-            # Filter for alphabetic words only and convert to lowercase
-            words = [w.lower() for w in words if w.isalpha()]
+                # Simple word tokenization using regex (avoid NLTK punkt dependency)
+                import re
+                words = re.findall(r'\b[a-zA-Z]+\b', text.lower())
 
-            # Get unique words (deduplicated)
-            unique_words = sorted(set(words))
+                # Get unique words (deduplicated)
+                unique_words = sorted(set(words))
 
-            # Tokenize sentences
-            sentences = sent_tokenize(text)
-            # Clean sentences (remove extra whitespace)
-            sentences = [s.strip() for s in sentences if s.strip()]
+                # Tokenize sentences with fallback
+                try:
+                    sentences = sent_tokenize(text)
+                except Exception as sent_error:
+                    logger.warning(
+                        f"NLTK sentence tokenization failed: {sent_error}")
+                    # Fallback: simple sentence splitting
+                    sentences = re.split(r'[.!?]+', text)
+                    sentences = [s.strip() for s in sentences if s.strip()]
+
+                # Clean sentences (remove extra whitespace)
+                sentences = [s.strip() for s in sentences if s.strip()]
+
+                logger.info(
+                    f"Processing complete: {len(words)} words, {len(unique_words)} unique words, {len(sentences)} sentences")
+            except Exception as tokenize_error:
+                logger.error(f"Failed to tokenize text: {str(tokenize_error)}")
+                return Response(
+                    {'error': f'Failed to tokenize text: {str(tokenize_error)}'},
+                    status=status.HTTP_500_INTERNAL_SERVER_ERROR
+                )
 
             return Response({
                 "word_list": words,
@@ -233,7 +318,37 @@ class UploadEpubView(APIView):
             })
 
         except Exception as e:
+            import traceback
+            error_details = traceback.format_exc()
+            logger.error(f"Unexpected error in EPUB processing: {str(e)}")
+            logger.error(f"Error details: {error_details}")
             return Response(
-                {'error': f'Error processing EPUB file: {str(e)}'},
+                {
+                    'error': f'Error processing EPUB file: {str(e)}',
+                    'details': error_details if settings.DEBUG else 'Enable DEBUG mode for detailed error information'
+                },
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
+
+
+class TestView(APIView):
+    """
+    Test endpoint to verify API functionality
+    """
+
+    def get(self, request):
+        return Response({
+            'message': 'API is working correctly',
+            'nltk_available': nltk.data.find('tokenizers/punkt') is not None,
+            'endpoints': {
+                'health': '/api/health/',
+                'upload': '/api/upload/',
+                'test': '/api/test/'
+            }
+        })
+
+    def post(self, request):
+        return Response({
+            'message': 'POST request received successfully',
+            'data': request.data if hasattr(request, 'data') else 'No data'
+        })
