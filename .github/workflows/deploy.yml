@@ -26,6 +26,11 @@ jobs:
           service_account_key: ${{ secrets.GCP_SA_KEY }}
           export_default_credentials: true
 
+      - name: Verify Authentication
+        run: |
+          gcloud auth list
+          gcloud config get-value project
+
       - name: Configure Docker for Artifact Registry
         run: |
           gcloud auth configure-docker europe-central2-docker.pkg.dev --quiet

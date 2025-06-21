@@ -1,5 +1,56 @@
 # Troubleshooting Guide
 
+## Authentication Issues
+
+### Error: "You do not currently have an active account selected"
+
+This error occurs when the GitHub Actions workflow doesn't have proper authentication set up with Google Cloud.
+
+### Quick Fix for GitHub Actions:
+
+1. **Run the GitHub Actions setup script:**
+   ```bash
+   ./setup-github-actions.sh
+   ```
+
+2. **Add the generated secrets to GitHub:**
+   - Go to your GitHub repository → Settings → Secrets and variables → Actions
+   - Add `GCP_PROJECT_ID`: `word-flow-text-analyzer`
+   - Add `GCP_SA_KEY`: (the base64-encoded key from the script output)
+
+### Manual GitHub Actions Setup:
+
+If the script doesn't work, manually set up the service account:
+
+```bash
+# Set project
+gcloud config set project word-flow-text-analyzer
+
+# Create service account
+gcloud iam service-accounts create github-actions \
+  --display-name="GitHub Actions Service Account"
+
+# Grant necessary roles
+gcloud projects add-iam-policy-binding word-flow-text-analyzer \
+  --member="serviceAccount:github-actions@word-flow-text-analyzer.iam.gserviceaccount.com" \
+  --role="roles/artifactregistry.writer"
+
+gcloud projects add-iam-policy-binding word-flow-text-analyzer \
+  --member="serviceAccount:github-actions@word-flow-text-analyzer.iam.gserviceaccount.com" \
+  --role="roles/run.admin"
+
+gcloud projects add-iam-policy-binding word-flow-text-analyzer \
+  --member="serviceAccount:github-actions@word-flow-text-analyzer.iam.gserviceaccount.com" \
+  --role="roles/iam.serviceAccountUser"
+
+# Create and download key
+gcloud iam service-accounts keys create github-actions-key.json \
+  --iam-account=github-actions@word-flow-text-analyzer.iam.gserviceaccount.com
+
+# Get base64-encoded key for GitHub
+cat github-actions-key.json | base64
+```
+
 ## Artifact Registry Authentication Issues
 
 ### Error: "Unauthenticated request. Unauthenticated requests do not have permission"
@@ -127,12 +178,16 @@ docker push europe-central2-docker.pkg.dev/word-flow-text-analyzer/word-flow-rep
 #### Issue: "Service account key invalid"
 **Solution**: Regenerate the service account key and update GitHub secrets.
 
+#### Issue: "You do not currently have an active account selected"
+**Solution**: Run `./setup-github-actions.sh` and add the secrets to GitHub.
+
 ### Required IAM Roles
 
 For the service account to work properly, it needs these roles:
 - `roles/artifactregistry.writer` - Upload images to Artifact Registry
 - `roles/run.admin` - Deploy to Cloud Run
 - `roles/iam.serviceAccountUser` - Use service accounts
+- `roles/storage.objectViewer` - Access Cloud Storage (for Cloud Build)
 
 ### Testing the Setup
 
@@ -154,4 +209,5 @@ If you're still having issues:
 1. Check the Google Cloud Console → IAM & Admin → IAM
 2. Verify the service account has the correct roles
 3. Check the Artifact Registry → Repositories section
-4. Review Cloud Build logs for detailed error messages 
+4. Review Cloud Build logs for detailed error messages
+5. Check GitHub Actions logs for authentication errors 
