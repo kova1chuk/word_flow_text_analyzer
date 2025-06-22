@@ -52,6 +52,8 @@ class RootAPIView(APIView):
             'endpoints': {
                 'health': '/api/health/',
                 'upload': '/api/upload/',
+                'text': '/api/text/',
+                'subtitle': '/api/subtitle/',
                 'swagger': '/swagger/',
                 'redoc': '/redoc/',
                 'admin': '/admin/'

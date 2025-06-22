@@ -9,3 +9,13 @@ class EPubUploadSerializer(serializers.Serializer):
 
     class Meta:
         fields = ('file',)
+
+
+class SubtitleUploadSerializer(serializers.Serializer):
+    """Serializer for subtitle file uploads (SRT, VTT, TXT)."""
+    file = serializers.FileField(
+        help_text="The subtitle file to analyze (SRT, VTT, TXT)"
+    )
+
+    class Meta:
+        fields = ('file',)
