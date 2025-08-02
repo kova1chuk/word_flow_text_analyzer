@@ -72,7 +72,7 @@ urlpatterns = [
     path('', RootAPIView.as_view(), name='api_root'),
 
     path('admin/', admin.site.urls),
-    path('api/', include('epub_parser.urls')),
+    path('api/', include('parser.urls')),
 
     # Swagger URLs
     re_path(r'^swagger(?P<format>\.json|\.yaml)$',

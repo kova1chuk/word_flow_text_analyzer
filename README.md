@@ -262,7 +262,7 @@ word_flow_text_analyzer/
 ├── backend/                 # Django project settings
 │   ├── settings.py         # Django configuration
 │   └── urls.py            # Main URL routing
-├── epub_parser/           # Main app
+├── parser/           # Main app
 │   ├── views.py          # API views with Swagger docs
 │   ├── urls.py           # App URL routing
 │   └── models.py         # Database models
@@ -312,8 +312,8 @@ gcloud logs read --service=word-flow-service --limit=50
 
 To add new features or modify the existing functionality:
 
-1. Update the views in `epub_parser/views.py` with proper Swagger documentation
-2. Add new URL patterns in `epub_parser/urls.py` if needed
+1. Update the views in `parser/views.py` with proper Swagger documentation
+2. Add new URL patterns in `parser/urls.py` if needed
 3. Test locally with `python manage.py runserver`
 4. Check Swagger documentation at `/swagger/`
 5. Push to main branch for automatic deployment

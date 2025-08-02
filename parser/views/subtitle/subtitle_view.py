@@ -1,0 +1,111 @@
+from ..base import Response, status, swagger_auto_schema, openapi, MultiPartParser
+from ...lib.base_analysis_view import BaseAnalysisView
+from ...serializers import SubtitleUploadSerializer
+from .subtitle_processor import SubtitleProcessor
+from drf_yasg import openapi
+
+
+class SubtitleAnalysisView(BaseAnalysisView):
+    parser_classes = [MultiPartParser]
+
+    def get_processor(self):
+        """Get the subtitle processor instance."""
+        return SubtitleProcessor()
+
+    def extract_text_from_request(self, request):
+        """Extract text content and filename from the request."""
+        if 'file' not in request.FILES:
+            raise ValueError('No file provided')
+
+        subtitle_file = request.FILES['file']
+        self.logger.info(
+            f"Received subtitle file: {subtitle_file.name}, size: {subtitle_file.size} bytes")
+
+        # Process subtitle file
+        processor = self.get_processor()
+        file_content = subtitle_file.read()
+        result = processor.process_file(file_content, subtitle_file.name)
+
+        if not result.success:
+            raise ValueError(result.error_message)
+
+        self.logger.info(
+            f"Successfully extracted {len(result.extracted_text)} characters from subtitle file")
+        return result.extracted_text, subtitle_file.name
+
+    def get_swagger_schema(self):
+        """Get the Swagger schema for subtitle analysis."""
+        return {
+            'operation_description': """
+            Analyze subtitle files for word and sentence statistics.
+            
+            This endpoint accepts subtitle files (SRT, VTT, TXT) and returns:
+            - Full word list (all words from the subtitles)
+            - Unique word list (deduplicated words)
+            - List of sentences from the subtitles
+            - Statistics (total counts)
+            
+            Supported formats:
+            - SRT (SubRip Subtitle)
+            - VTT (WebVTT)
+            - TXT (plain text)
+            
+            The text is processed to:
+            - Remove subtitle timestamps and formatting
+            - Convert to lowercase
+            - Filter for alphabetic words only
+            - Remove extra whitespace
+            """,
+            'operation_summary': "Analyze subtitle file",
+            'request_body': SubtitleUploadSerializer,
+            'responses': self.get_standard_swagger_responses(),
+            'tags': ['Text Analysis'],
+            'operation_id': 'analyze_subtitle'
+        }
+
+    @swagger_auto_schema(
+        operation_description="""
+        Analyze subtitle files for word and sentence statistics.
+        
+        This endpoint accepts subtitle files (SRT, VTT, TXT) and returns:
+        - Full word list (all words from the subtitles)
+        - Unique word list (deduplicated words)
+        - List of sentences from the subtitles
+        - Statistics (total counts)
+        
+        Supported formats:
+        - SRT (SubRip Subtitle)
+        - VTT (WebVTT)
+        - TXT (plain text)
+        
+        The text is processed to:
+        - Remove subtitle timestamps and formatting
+        - Convert to lowercase
+        - Filter for alphabetic words only
+        - Remove extra whitespace
+        """,
+        operation_summary="Analyze subtitle file",
+        request_body=SubtitleUploadSerializer,
+        responses=BaseAnalysisView.get_standard_swagger_responses(),
+        tags=['Text Analysis'],
+        operation_id='analyze_subtitle'
+    )
+    def post(self, request):
+        try:
+            self.logger.info("Starting subtitle file analysis")
+
+            # Extract text from request
+            text, filename = self.extract_text_from_request(request)
+
+            # Analyze text and return response
+            return self.analyze_text(text, endpoint_type="subtitle", filename=filename)
+
+        except ValueError as e:
+            # Validation error
+            return Response(
+                {'error': str(e)},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        except Exception as e:
+            # Unexpected error
+            return self.handle_unexpected_error(e, "subtitle analysis")

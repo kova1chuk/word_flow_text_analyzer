@@ -54,7 +54,7 @@ INSTALLED_APPS = [
     # ==================
     'rest_framework',
     'drf_yasg',
-    'epub_parser',
+    'parser',
     'corsheaders',
 ]
 
