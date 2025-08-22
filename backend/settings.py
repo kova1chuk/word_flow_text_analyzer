@@ -145,6 +145,13 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
+# URL Configuration
+APPEND_SLASH = False
+
+# Cloud API credentials
+GOOGLE_CLOUD_CREDENTIALS_PATH = os.path.join(
+    BASE_DIR, 'credentials', 'google-cloud-credentials.json')
+
 # Security settings for production
 if not DEBUG:
     SECURE_BROWSER_XSS_FILTER = True

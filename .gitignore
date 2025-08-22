@@ -1,4 +1,88 @@
+# Virtual environment
 venv
 __pycache__
 **/__pycache__
 */__pycache__
+
+# Credentials and sensitive files
+credentials/*.json
+credentials/*.key
+credentials/*.pem
+*.json
+*.key
+*.pem
+.env
+.env.local
+.env.production
+
+# Google Cloud credentials
+word-flow-text-analyzer-*.json
+google-credentials.json
+
+# Azure credentials
+azure-credentials.json
+azure-config.json
+
+# AWS credentials
+.aws/
+aws-credentials.json
+
+# Database
+*.db
+*.sqlite3
+db.sqlite3
+
+# Media and uploads
+media/
+uploads/
+analyzed_images/
+
+# Logs
+logs/
+*.log
+
+# Temporary files
+temp/
+tmp/
+*.tmp
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Python
+*.pyc
+*.pyo
+*.pyd
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Django
+staticfiles/
+local_settings.py
