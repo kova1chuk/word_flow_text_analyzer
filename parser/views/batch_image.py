@@ -74,7 +74,7 @@ class BatchImageAnalysisView(APIView):
             except ValueError:
                 return Response({
                     'success': False,
-                    'error': f'Invalid OCR engine. Available engines: {[e.value for e in OCREngine]}'
+                    'error': f'Invalid OCR engine. Available engines: {[str(e.value) for e in OCREngine]}'
                 }, status=status.HTTP_400_BAD_REQUEST)
 
             # Create session

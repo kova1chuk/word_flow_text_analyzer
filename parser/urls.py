@@ -12,10 +12,11 @@ urlpatterns = [
     path('image', ImageAnalysisView.as_view(), name='analyze_image'),
     path('image/health', ImageAnalysisHealthView.as_view(),
          name='image_health_check'),
-    path('image/batch', BatchImageAnalysisView.as_view(),
-         name='batch_analyze_images'),
-    path('image/batch/status',
-         BatchImageAnalysisStatusView.as_view(), name='batch_status'),
-    path('image/batch/results',
-         BatchImageAnalysisResultsView.as_view(), name='batch_results'),
+    # Temporarily disabled to fix Swagger issues
+    # path('image/batch', BatchImageAnalysisView.as_view(),
+    #      name='batch_analyze_images'),
+    # path('image/batch/status',
+    #      name='batch_status'),
+    # path('image/batch/results',
+    #      name='batch_results'),
 ]
