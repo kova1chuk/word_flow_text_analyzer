@@ -26,12 +26,12 @@ opencv-python==4.9.0.80
 langdetect==1.0.9
 # Google Cloud Vision API (optional, for cloud-based OCR)
 google-cloud-vision==3.7.1
-# Azure AI Vision (optional, for cloud-based OCR) - using compatible version
-azure-ai-vision==0.13.0
-# AWS Textract (optional, for cloud-based OCR)
-boto3==1.34.0
+# Azure AI Vision (optional, for cloud-based OCR) - temporarily disabled due to compatibility issues
+# azure-ai-vision==0.13.0
+# AWS Textract (optional, for cloud-based OCR) - temporarily disabled
+# boto3==1.34.0
 # Spell checking and word validation
 pyspellchecker==0.7.2
 # Fuzzy string matching for OCR error correction
 fuzzywuzzy==0.18.0
-python-Levenshtein==0.25.0
+# python-Levenshtein==0.25.0  # Temporarily disabled due to potential compatibility issues
