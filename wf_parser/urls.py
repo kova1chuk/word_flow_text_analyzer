@@ -1,6 +1,6 @@
 from django.urls import path
-from .views import EpubAnalysisView, HealthCheckView, TestView, TextAnalysisView, SubtitleAnalysisView, ImageAnalysisView, ImageAnalysisHealthView
-from .views.batch_image import BatchImageAnalysisView, BatchImageAnalysisStatusView, BatchImageAnalysisResultsView
+from wf_parser.views import EpubAnalysisView, HealthCheckView, TestView, TextAnalysisView, SubtitleAnalysisView, ImageAnalysisView, ImageAnalysisHealthView
+from wf_parser.views.batch_image import BatchImageAnalysisView, BatchImageAnalysisStatusView, BatchImageAnalysisResultsView
 
 urlpatterns = [
     path('epub', EpubAnalysisView.as_view(), name='upload_epub'),
