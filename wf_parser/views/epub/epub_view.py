@@ -4,7 +4,6 @@ from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
 from rest_framework.parsers import MultiPartParser
 from ...lib.base_analysis_view import BaseAnalysisView
-from ...serializers import EPubUploadSerializer
 from .epub_processor import EpubProcessor
 from drf_yasg import openapi
 
@@ -39,6 +38,9 @@ class EpubAnalysisView(BaseAnalysisView):
 
     def get_swagger_schema(self):
         """Get the Swagger schema for EPUB analysis."""
+        # Import here to avoid circular imports
+        from ...serializers import EPubUploadSerializer
+        
         return {
             'operation_description': """
             Upload an EPUB file for parsing and text analysis.
@@ -79,7 +81,7 @@ class EpubAnalysisView(BaseAnalysisView):
         - Remove extra whitespace
         """,
         operation_summary="Upload and parse EPUB file",
-        request_body=EPubUploadSerializer,
+        request_body=None,  # Will be set dynamically
         responses=BaseAnalysisView.get_standard_swagger_responses(),
         tags=['Text Analysis'],
         operation_id='upload_epub'

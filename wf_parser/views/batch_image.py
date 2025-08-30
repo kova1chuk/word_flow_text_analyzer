@@ -2,8 +2,9 @@ import os
 import logging
 import tempfile
 import uuid
-from typing import List, Dict, Any
+from typing import List, Dict, Any, Optional
 from concurrent.futures import ThreadPoolExecutor, as_completed
+from datetime import datetime, timezone
 from django.conf import settings
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -12,7 +13,6 @@ from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
 from ..lib.image_processor import ImageProcessor, OCREngine
 from ..models import ImageAnalysisResult, ImageAnalysisSession
-from ..serializers import BatchImageAnalysisRequestSerializer, ImageAnalysisSessionSerializer
 from django.db import models
 
 logger = logging.getLogger(__name__)
@@ -23,7 +23,7 @@ class BatchImageAnalysisView(APIView):
 
     @swagger_auto_schema(
         operation_description="Process multiple images in batch with OCR, language detection, and word validation",
-        request_body=BatchImageAnalysisRequestSerializer,
+        request_body=None,  # Will be set dynamically
         responses={
             202: openapi.Response(
                 description="Batch processing started",
@@ -50,6 +50,9 @@ class BatchImageAnalysisView(APIView):
     def post(self, request):
         """Start batch processing of multiple images"""
         try:
+            # Import here to avoid circular imports
+            from ..serializers import BatchImageAnalysisRequestSerializer, ImageAnalysisSessionSerializer
+            
             # Validate request
             serializer = BatchImageAnalysisRequestSerializer(data=request.data)
             if not serializer.is_valid():
@@ -276,6 +279,7 @@ class BatchImageAnalysisStatusView(APIView):
                 }, status=status.HTTP_404_NOT_FOUND)
 
             # Get session data
+            from ..serializers import ImageAnalysisSessionSerializer
             session_data = ImageAnalysisSessionSerializer(session).data
 
             return Response({
@@ -365,6 +369,7 @@ class BatchImageAnalysisResultsView(APIView):
 
             if output_format == 'summary':
                 # Return summary only
+                from ..serializers import ImageAnalysisSessionSerializer
                 response_data = {
                     'session_summary': ImageAnalysisSessionSerializer(session).data,
                     'results_count': results.count(),

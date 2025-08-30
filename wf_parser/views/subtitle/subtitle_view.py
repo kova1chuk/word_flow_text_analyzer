@@ -4,9 +4,7 @@ from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
 from rest_framework.parsers import MultiPartParser
 from ...lib.base_analysis_view import BaseAnalysisView
-from ...serializers import SubtitleUploadSerializer
 from .subtitle_processor import SubtitleProcessor
-from drf_yasg import openapi
 
 
 class SubtitleAnalysisView(BaseAnalysisView):
@@ -17,13 +15,13 @@ class SubtitleAnalysisView(BaseAnalysisView):
         return SubtitleProcessor()
 
     def extract_text_from_request(self, request):
-        """Extract text content and filename from the request."""
+        """Extract text content, file info, and filename from the request."""
         if 'file' not in request.FILES:
             raise ValueError('No file provided')
 
         subtitle_file = request.FILES['file']
         self.logger.info(
-            f"Received subtitle file: {subtitle_file.name}, size: {subtitle_file.size} bytes")
+            f"Received file: {subtitle_file.name}, size: {subtitle_file.size} bytes")
 
         # Process subtitle file
         processor = self.get_processor()
@@ -35,74 +33,67 @@ class SubtitleAnalysisView(BaseAnalysisView):
 
         self.logger.info(
             f"Successfully extracted {len(result.extracted_text)} characters from subtitle file")
-        return result.extracted_text, subtitle_file.name
+        return result.extracted_text, result.file_info, subtitle_file.name
 
     def get_swagger_schema(self):
         """Get the Swagger schema for subtitle analysis."""
+        # Import here to avoid circular imports
+        from ...serializers import SubtitleUploadSerializer
+        
         return {
             'operation_description': """
-            Analyze subtitle files for word and sentence statistics.
+            Upload a subtitle file for parsing and text analysis.
             
-            This endpoint accepts subtitle files (SRT, VTT, TXT) and returns:
+            This endpoint accepts subtitle files (SRT, VTT, ASS, SSA) and returns:
             - Full word list (all words from the subtitles)
             - Unique word list (deduplicated words)
             - List of sentences from the subtitles
             - Statistics (total counts)
             
-            Supported formats:
-            - SRT (SubRip Subtitle)
-            - VTT (WebVTT)
-            - TXT (plain text)
-            
             The text is processed to:
-            - Remove subtitle timestamps and formatting
+            - Remove subtitle formatting and timestamps
             - Convert to lowercase
             - Filter for alphabetic words only
             - Remove extra whitespace
             """,
-            'operation_summary': "Analyze subtitle file",
+            'operation_summary': "Upload and parse subtitle file",
             'request_body': SubtitleUploadSerializer,
             'responses': self.get_standard_swagger_responses(),
             'tags': ['Text Analysis'],
-            'operation_id': 'analyze_subtitle'
+            'operation_id': 'upload_subtitle'
         }
 
     @swagger_auto_schema(
         operation_description="""
-        Analyze subtitle files for word and sentence statistics.
+        Upload a subtitle file for parsing and text analysis.
         
-        This endpoint accepts subtitle files (SRT, VTT, TXT) and returns:
+        This endpoint accepts subtitle files (SRT, VTT, ASS, SSA) and returns:
         - Full word list (all words from the subtitles)
         - Unique word list (deduplicated words)
         - List of sentences from the subtitles
         - Statistics (total counts)
         
-        Supported formats:
-        - SRT (SubRip Subtitle)
-        - VTT (WebVTT)
-        - TXT (plain text)
-        
         The text is processed to:
-        - Remove subtitle timestamps and formatting
+        - Remove subtitle formatting and timestamps
         - Convert to lowercase
         - Filter for alphabetic words only
         - Remove extra whitespace
         """,
-        operation_summary="Analyze subtitle file",
-        request_body=SubtitleUploadSerializer,
+        operation_summary="Upload and parse subtitle file",
+        request_body=None,  # Will be set dynamically
         responses=BaseAnalysisView.get_standard_swagger_responses(),
         tags=['Text Analysis'],
-        operation_id='analyze_subtitle'
+        operation_id='upload_subtitle'
     )
     def post(self, request):
         try:
-            self.logger.info("Starting subtitle file analysis")
+            self.logger.info("Starting subtitle upload processing")
 
             # Extract text from request
-            text, filename = self.extract_text_from_request(request)
+            text, file_info, filename = self.extract_text_from_request(request)
 
             # Analyze text and return response
-            return self.analyze_text(text, endpoint_type="subtitle", filename=filename)
+            return self.analyze_text(text, endpoint_type="subtitle", file_info=file_info, filename=filename)
 
         except ValueError as e:
             # Validation error
