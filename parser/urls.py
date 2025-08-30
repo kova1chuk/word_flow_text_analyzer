@@ -1,6 +1,5 @@
 from django.urls import path
-from .views import EpubAnalysisView, HealthCheckView, TestView, TextAnalysisView, SubtitleAnalysisView
-from .views.image import ImageAnalysisView, ImageAnalysisHealthView
+from .views import EpubAnalysisView, HealthCheckView, TestView, TextAnalysisView, SubtitleAnalysisView, ImageAnalysisView, ImageAnalysisHealthView
 from .views.batch_image import BatchImageAnalysisView, BatchImageAnalysisStatusView, BatchImageAnalysisResultsView
 
 urlpatterns = [
