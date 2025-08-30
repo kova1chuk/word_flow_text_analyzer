@@ -39,7 +39,7 @@ class SubtitleAnalysisView(BaseAnalysisView):
         """Get the Swagger schema for subtitle analysis."""
         # Import here to avoid circular imports
         from ...serializers import SubtitleUploadSerializer
-        
+
         return {
             'operation_description': """
             Upload a subtitle file for parsing and text analysis.
