@@ -3,7 +3,7 @@ from rest_framework import status
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
 from rest_framework.parsers import MultiPartParser
-from ...lib.base_analysis_view import BaseAnalysisView
+from wf_parser.lib.base_analysis_view import BaseAnalysisView
 from .subtitle_processor import SubtitleProcessor
 
 
@@ -38,7 +38,7 @@ class SubtitleAnalysisView(BaseAnalysisView):
     def get_swagger_schema(self):
         """Get the Swagger schema for subtitle analysis."""
         # Import here to avoid circular imports
-        from ...serializers import SubtitleUploadSerializer
+        from wf_parser.serializers import SubtitleUploadSerializer
 
         return {
             'operation_description': """

@@ -2,7 +2,7 @@ from rest_framework.response import Response
 from rest_framework import status
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
-from ...lib.base_analysis_view import BaseAnalysisView
+from wf_parser.lib.base_analysis_view import BaseAnalysisView
 from .text_processor import TextProcessor
 from drf_yasg import openapi
 

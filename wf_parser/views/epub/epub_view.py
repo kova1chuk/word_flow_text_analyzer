@@ -3,7 +3,7 @@ from rest_framework import status
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
 from rest_framework.parsers import MultiPartParser
-from ...lib.base_analysis_view import BaseAnalysisView
+from wf_parser.lib.base_analysis_view import BaseAnalysisView
 from .epub_processor import EpubProcessor
 from drf_yasg import openapi
 
@@ -39,7 +39,7 @@ class EpubAnalysisView(BaseAnalysisView):
     def get_swagger_schema(self):
         """Get the Swagger schema for EPUB analysis."""
         # Import here to avoid circular imports
-        from ...serializers import EPubUploadSerializer
+        from wf_parser.serializers import EPubUploadSerializer
         
         return {
             'operation_description': """

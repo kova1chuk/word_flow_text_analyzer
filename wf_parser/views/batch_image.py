@@ -2,6 +2,7 @@ import os
 import logging
 import tempfile
 import uuid
+import threading
 from typing import List, Dict, Any, Optional
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime, timezone
@@ -11,8 +12,8 @@ from rest_framework.response import Response
 from rest_framework import status
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
-from ..lib.image_processor import ImageProcessor, OCREngine
-from ..models import ImageAnalysisResult, ImageAnalysisSession
+from wf_parser.lib.image_processor import ImageProcessor, OCREngine
+from wf_parser.models import ImageAnalysisResult, ImageAnalysisSession
 from django.db import models
 
 logger = logging.getLogger(__name__)
@@ -51,7 +52,7 @@ class BatchImageAnalysisView(APIView):
         """Start batch processing of multiple images"""
         try:
             # Import here to avoid circular imports
-            from ..serializers import BatchImageAnalysisRequestSerializer, ImageAnalysisSessionSerializer
+            from wf_parser.serializers import BatchImageAnalysisRequestSerializer, ImageAnalysisSessionSerializer
             
             # Validate request
             serializer = BatchImageAnalysisRequestSerializer(data=request.data)
@@ -279,7 +280,7 @@ class BatchImageAnalysisStatusView(APIView):
                 }, status=status.HTTP_404_NOT_FOUND)
 
             # Get session data
-            from ..serializers import ImageAnalysisSessionSerializer
+            from wf_parser.serializers import ImageAnalysisSessionSerializer
             session_data = ImageAnalysisSessionSerializer(session).data
 
             return Response({
@@ -369,7 +370,7 @@ class BatchImageAnalysisResultsView(APIView):
 
             if output_format == 'summary':
                 # Return summary only
-                from ..serializers import ImageAnalysisSessionSerializer
+                from wf_parser.serializers import ImageAnalysisSessionSerializer
                 response_data = {
                     'session_summary': ImageAnalysisSessionSerializer(session).data,
                     'results_count': results.count(),
@@ -379,7 +380,7 @@ class BatchImageAnalysisResultsView(APIView):
                 }
             else:
                 # Return full results
-                from ..serializers import ImageAnalysisResultSerializer
+                from wf_parser.serializers import ImageAnalysisResultSerializer
                 response_data = {
                     'session_summary': ImageAnalysisSessionSerializer(session).data,
                     'results': ImageAnalysisResultSerializer(results, many=True).data
