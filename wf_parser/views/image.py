@@ -9,7 +9,7 @@ from rest_framework.parsers import MultiPartParser
 from rest_framework import status
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
-from ..lib.image_processor import ImageProcessor, OCREngine, process_image_simple
+from wf_parser.lib.image_processor import ImageProcessor, OCREngine, process_image_simple
 
 logger = logging.getLogger(__name__)
 

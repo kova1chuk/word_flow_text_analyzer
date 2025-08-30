@@ -10,9 +10,9 @@ from rest_framework.response import Response
 from rest_framework import status
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
-from ..lib.image_processor import ImageProcessor, OCREngine
-from ..models import ImageAnalysisResult, ImageAnalysisSession
-from ..serializers import BatchImageAnalysisRequestSerializer, ImageAnalysisSessionSerializer
+from wf_parser.lib.image_processor import ImageProcessor, OCREngine
+from wf_parser.models import ImageAnalysisResult, ImageAnalysisSession
+from wf_parser.serializers import BatchImageAnalysisRequestSerializer, ImageAnalysisSessionSerializer
 from django.db import models
 
 logger = logging.getLogger(__name__)
@@ -374,7 +374,7 @@ class BatchImageAnalysisResultsView(APIView):
                 }
             else:
                 # Return full results
-                from ..serializers import ImageAnalysisResultSerializer
+                from wf_parser.serializers import ImageAnalysisResultSerializer
                 response_data = {
                     'session_summary': ImageAnalysisSessionSerializer(session).data,
                     'results': ImageAnalysisResultSerializer(results, many=True).data
