@@ -25,7 +25,7 @@ logging.basicConfig(
 def test_image_processor():
     """Test the basic image processor functionality"""
     try:
-        from parser.lib.image_processor import ImageProcessor, OCREngine, process_image_simple
+        from wf_parser.lib.image_processor import ImageProcessor, OCREngine, process_image_simple
 
         print("🚀 Testing Image Text Analysis System")
         print("=" * 50)
@@ -156,7 +156,7 @@ def find_test_image():
 def test_health_check():
     """Test the health check functionality"""
     try:
-        from parser.views.image import ImageAnalysisHealthView
+        from wf_parser.views.image import ImageAnalysisHealthView
         from rest_framework.test import APIRequestFactory
 
         print("\n🔍 Testing Health Check...")

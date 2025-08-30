@@ -175,7 +175,7 @@ class ImageAnalysisView(APIView):
                 summary = processor.get_processing_summary(result)
 
                 # Convert OCR result to standard format
-                from parser.lib.text_parser import TextParser
+                from wf_parser.lib.text_parser import TextParser
 
                 # Create a text parser to analyze the extracted text
                 text_parser = TextParser()
