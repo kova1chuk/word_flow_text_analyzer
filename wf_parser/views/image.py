@@ -9,7 +9,7 @@ from rest_framework.parsers import MultiPartParser
 from rest_framework import status
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
-from wf_parser.lib.image_processor import ImageProcessor, OCREngine, process_image_simple
+from ..lib.image_processor import ImageProcessor, OCREngine, process_image_simple
 
 logger = logging.getLogger(__name__)
 
@@ -175,7 +175,7 @@ class ImageAnalysisView(APIView):
                 summary = processor.get_processing_summary(result)
 
                 # Convert OCR result to standard format
-                from wf_parser.lib.text_parser import TextParser
+                from ..lib.text_parser import TextParser
 
                 # Create a text parser to analyze the extracted text
                 text_parser = TextParser()

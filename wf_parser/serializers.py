@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from wf_parser.models import ImageAnalysisResult, ImageAnalysisSession
+from .models import ImageAnalysisResult, ImageAnalysisSession
 
 
 class EPubUploadSerializer(serializers.Serializer):

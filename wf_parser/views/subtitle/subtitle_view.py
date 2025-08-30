@@ -3,8 +3,8 @@ from rest_framework import status
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
 from rest_framework.parsers import MultiPartParser
-from wf_parser.lib.base_analysis_view import BaseAnalysisView
-from wf_parser.serializers import SubtitleUploadSerializer
+from ...lib.base_analysis_view import BaseAnalysisView
+from ...serializers import SubtitleUploadSerializer
 from .subtitle_processor import SubtitleProcessor
 from drf_yasg import openapi
 

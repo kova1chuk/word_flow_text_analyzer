@@ -5,7 +5,7 @@ Text processing library for analyzing plain text input.
 import logging
 from typing import Optional, Tuple
 from dataclasses import dataclass
-from wf_parser.lib.base_processor import BaseProcessor, ProcessingResult
+from ...lib.base_processor import BaseProcessor, ProcessingResult
 
 
 @dataclass

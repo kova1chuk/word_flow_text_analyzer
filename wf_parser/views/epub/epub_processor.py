@@ -9,7 +9,7 @@ from typing import Optional, Tuple
 from dataclasses import dataclass
 from ebooklib import epub
 from bs4 import BeautifulSoup
-from wf_parser.lib.base_processor import BaseProcessor, ProcessingResult
+from ...lib.base_processor import BaseProcessor, ProcessingResult
 
 
 @dataclass
