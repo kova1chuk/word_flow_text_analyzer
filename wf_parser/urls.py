@@ -1,11 +1,12 @@
+# Updated: 2025-08-30 23:16 - Force rebuild to fix import issues
 from django.urls import path
-from .views.health import HealthCheckView
-from .views.epub.epub_view import EpubAnalysisView
-from .views.test import TestView
-from .views.text.text_view import TextAnalysisView
-from .views.subtitle.subtitle_view import SubtitleAnalysisView
-from .views.image import ImageAnalysisView, ImageAnalysisHealthView
-from .views.batch_image import BatchImageAnalysisView, BatchImageAnalysisStatusView, BatchImageAnalysisResultsView
+from wf_parser.views.health import HealthCheckView
+from wf_parser.views.epub.epub_view import EpubAnalysisView
+from wf_parser.views.test import TestView
+from wf_parser.views.text.text_view import TextAnalysisView
+from wf_parser.views.subtitle.subtitle_view import SubtitleAnalysisView
+from wf_parser.views.image import ImageAnalysisView, ImageAnalysisHealthView
+from wf_parser.views.batch_image import BatchImageAnalysisView, BatchImageAnalysisStatusView, BatchImageAnalysisResultsView
 
 urlpatterns = [
     path('epub', EpubAnalysisView.as_view(), name='upload_epub'),
